@@ -1,4 +1,4 @@
-ï»¿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const IEMAApp());
@@ -931,7 +931,7 @@ class MorePage extends StatelessWidget {
       subtitle: Text(
         subtitle,
         style: const TextStyle(
-          color: Colors.white45,
+          color: Color(0x73FFFFFF),
           fontSize: 12,
         ),
       ),
@@ -981,7 +981,7 @@ class _ControlCenterPageState extends State<ControlCenterPage> {
           _controlCard(
             Icons.swap_horiz,
             'Channel Balance',
-            'L   â€¢   R',
+            'L   •   R',
             Slider(
               value: balance,
               min: -1,
@@ -1077,7 +1077,7 @@ class _ControlCenterPageState extends State<ControlCenterPage> {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Colors.white45,
+                    color: Color(0x73FFFFFF),
                     fontSize: 12,
                   ),
                 ),
@@ -1140,7 +1140,7 @@ class DeviceDetailsPage extends StatelessWidget {
           const SizedBox(height: 5),
 
           const Text(
-            'Connected â€¢ Wired',
+            'Connected • Wired',
             style: TextStyle(
               color: Colors.greenAccent,
             ),
@@ -1296,7 +1296,7 @@ class AudioTestPage extends StatelessWidget {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Colors.white45,
+                    color: Color(0x73FFFFFF),
                     fontSize: 12,
                   ),
                 ),
