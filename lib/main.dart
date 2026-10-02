@@ -1102,15 +1102,18 @@ class DeviceDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const deviceName = 'IEMA IEM';
+    const connection = 'Wired';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IEMA IEM'),
+        title: const Text('Device Details'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         children: [
           Container(
-            height: 180,
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [
@@ -1119,65 +1122,361 @@ class DeviceDetailsPage extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(25),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.headphones,
-                size: 80,
-                color: Color(0xFF9D82FF),
+              border: Border.all(
+                color: Colors.white10,
               ),
             ),
-          ),
+            child: Column(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9D82FF).withAlpha(30),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.headphones,
+                    size: 48,
+                    color: Color(0xFF9D82FF),
+                  ),
+                ),
 
-          const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
-          const Text(
-            'IEMA IEM',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+                const Text(
+                  deviceName,
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-          const SizedBox(height: 5),
+                const SizedBox(height: 8),
 
-          const Text(
-            'Connected • Wired',
-            style: TextStyle(
-              color: Colors.greenAccent,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 9,
+                      height: 9,
+                      decoration: const BoxDecoration(
+                        color: Colors.greenAccent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Connected',
+                      style: TextStyle(
+                        color: Colors.greenAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '•',
+                      style: TextStyle(
+                        color: Colors.white38,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      connection,
+                      style: TextStyle(
+                        color: Colors.white60,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 25),
 
-          _info('Connection', 'Connected'),
-          _info('Driver', 'Dynamic Driver'),
-          _info('Channels', 'Stereo'),
-          _info('Battery', 'Not available'),
-          _info('Firmware', 'Not available'),
+          _sectionTitle('Connection'),
+
+          _infoCard(
+            Icons.link,
+            'Status',
+            'Connected',
+          ),
+
+          _infoCard(
+            Icons.cable,
+            'Connection Type',
+            connection,
+          ),
+
+          const SizedBox(height: 15),
+
+          _sectionTitle('Audio'),
+
+          _infoCard(
+            Icons.surround_sound,
+            'Output',
+            'Stereo',
+          ),
+
+          _infoCard(
+            Icons.equalizer,
+            'Equalizer',
+            'Available',
+          ),
+
+          _infoCard(
+            Icons.volume_up,
+            'Software Volume',
+            'Available',
+          ),
+
+          const SizedBox(height: 15),
+
+          _sectionTitle('Hardware Capabilities'),
+
+          _capability(
+            'Hardware Volume',
+            false,
+          ),
+
+          _capability(
+            'Gain Control',
+            false,
+          ),
+
+          _capability(
+            'ANC',
+            false,
+          ),
+
+          _capability(
+            'Transparency',
+            false,
+          ),
 
           const SizedBox(height: 20),
+
+          _sectionTitle('Actions'),
 
           FilledButton.icon(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ControlCenterPage(),
+                  builder: (_) => const EqualizerPage(),
                 ),
               );
             },
-            icon: const Icon(Icons.tune),
-            label: const Text('Open Control Center'),
+            icon: const Icon(Icons.equalizer),
+            label: const Text('Open Equalizer'),
+          ),
+
+          const SizedBox(height: 10),
+
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AudioTestPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.graphic_eq),
+            label: const Text('Audio Test'),
+          ),
+
+          const SizedBox(height: 10),
+
+          OutlinedButton.icon(
+            onPressed: () {
+              _showDeviceInformation(context);
+            },
+            icon: const Icon(Icons.info_outline),
+            label: const Text('Device Information'),
+          ),
+
+          const SizedBox(height: 10),
+
+          TextButton.icon(
+            onPressed: () {
+              _showForgetDialog(context);
+            },
+            icon: const Icon(
+              Icons.delete_outline,
+              color: Colors.redAccent,
+            ),
+            label: const Text(
+              'Forget Device',
+              style: TextStyle(
+                color: Colors.redAccent,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 4,
+        bottom: 10,
+      ),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white54,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _infoCard(
+    IconData icon,
+    String title,
+    String value,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF11141B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white10,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF9D82FF),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white70,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _info(String title, String value) {
+  Widget _capability(
+    String title,
+    bool supported,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF11141B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white10,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            supported
+                ? Icons.check_circle
+                : Icons.remove_circle_outline,
+            color: supported
+                ? Colors.greenAccent
+                : Colors.white38,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(title),
+          ),
+          Text(
+            supported ? 'Supported' : 'Not supported',
+            style: TextStyle(
+              color: supported
+                  ? Colors.greenAccent
+                  : Colors.white38,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeviceInformation(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF11141B),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Device Information',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                _detailRow('Name', 'IEMA IEM'),
+                _detailRow('Connection', 'Wired'),
+                _detailRow('Channels', 'Stereo'),
+                _detailRow('Driver', 'Dynamic Driver'),
+                _detailRow('Battery', 'Not available'),
+                _detailRow('Firmware', 'Not available'),
+
+                const SizedBox(height: 15),
+
+                const Text(
+                  'Hardware information will be populated when '
+                  'real IEMA hardware support is connected.',
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 12,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 17),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Expanded(
@@ -1191,11 +1490,48 @@ class DeviceDetailsPage extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showForgetDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Forget Device?'),
+          content: const Text(
+            'This will remove the device from IEMA. '
+            'You can add it again later.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Device removal will be connected '
+                      'to the real device service later.',
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Forget'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1314,6 +1650,7 @@ class AudioTestPage extends StatelessWidget {
     );
   }
 }
+
 
 
 
