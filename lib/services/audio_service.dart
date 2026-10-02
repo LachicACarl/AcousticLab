@@ -7,6 +7,8 @@ class AudioService {
 
   EqProfile _currentProfile = EqProfile.flat();
 
+  double _volume = 1.0;
+
   EqProfile get currentProfile => _currentProfile;
 
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
@@ -15,11 +17,15 @@ class AudioService {
 
   Stream<Duration?> get durationStream => _player.durationStream;
 
+  Stream<double> get volumeStream => _player.volumeStream;
+
   bool get isPlaying => _player.playing;
 
   Duration get position => _player.position;
 
   Duration? get duration => _player.duration;
+
+  double get volume => _volume;
 
   Future<void> loadAudio(String url) async {
     await _player.setUrl(url);
@@ -42,7 +48,11 @@ class AudioService {
   }
 
   Future<void> setVolume(double volume) async {
-    await _player.setVolume(volume.clamp(0.0, 1.0));
+    final safeVolume = volume.clamp(0.0, 1.0);
+
+    _volume = safeVolume;
+
+    await _player.setVolume(safeVolume);
   }
 
   void loadProfile(EqProfile profile) {
@@ -54,19 +64,15 @@ class AudioService {
       case 'Bass':
         _currentProfile = EqProfile.bass();
         break;
-
       case 'Vocal':
         _currentProfile = EqProfile.vocal();
         break;
-
       case 'Gaming':
         _currentProfile = EqProfile.gaming();
         break;
-
       case 'Movie':
         _currentProfile = EqProfile.movie();
         break;
-
       case 'Flat':
       default:
         _currentProfile = EqProfile.flat();

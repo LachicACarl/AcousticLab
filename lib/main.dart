@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'screens/audio_player_page.dart';
+import 'services/audio_service.dart';
 
 void main() {
   runApp(const IEMAApp());
@@ -103,6 +104,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final AudioService _audioService = AudioService();
+
+  @override
+  void dispose() {
+    _audioService.dispose();
+    super.dispose();
+  }
   double volume = 65;
 
   @override
@@ -419,7 +427,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const AudioPlayerPage(),
+                    builder: (_) => AudioPlayerPage(audioService: _audioService),
                   ),
                 );
               },
@@ -635,7 +643,7 @@ class _EqualizerPageState extends State<EqualizerPage> {
             const SizedBox(height: 24),
 
             DropdownButtonFormField<String>(
-              value: preset,
+              initialValue: preset,
               decoration: InputDecoration(
                 labelText: 'Preset',
                 filled: true,
@@ -1656,6 +1664,10 @@ class AudioTestPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
 
 
 
