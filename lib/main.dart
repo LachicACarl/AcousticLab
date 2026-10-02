@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-import 'models/eq_profile.dart';
-import 'services/audio_service.dart';
+ï»¿import 'package:flutter/material.dart';
+import 'screens/audio_player_page.dart';
 
 void main() {
   runApp(const IEMAApp());
@@ -416,7 +415,14 @@ class _HomePageState extends State<HomePage> {
               color: Color(0xFF7C5CFC),
             ),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AudioPlayerPage(),
+                  ),
+                );
+              },
               icon: const Icon(Icons.play_arrow),
               color: Colors.white,
             ),
@@ -983,7 +989,7 @@ class _ControlCenterPageState extends State<ControlCenterPage> {
           _controlCard(
             Icons.swap_horiz,
             'Channel Balance',
-            'L   •   R',
+            'L   â€¢   R',
             Slider(
               value: balance,
               min: -1,
@@ -1175,7 +1181,7 @@ class DeviceDetailsPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      '•',
+                      'â€¢',
                       style: TextStyle(
                         color: Colors.white38,
                       ),
@@ -1650,6 +1656,10 @@ class AudioTestPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
 
 
 
