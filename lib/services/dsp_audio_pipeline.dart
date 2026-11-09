@@ -93,10 +93,11 @@ class DspAudioPipeline {
     await AudioSessionService.instance.deactivate();
   }
 
-  Future<void> _pauseForInterruption() async {
-    if (!_running || _paused) return;
+  Future<bool> _pauseForInterruption() async {
+    if (!_running || _paused) return false;
     _paused = true;
     await _player?.pause();
+    return true;
   }
 
   Future<void> _resumeAfterInterruption() async {
