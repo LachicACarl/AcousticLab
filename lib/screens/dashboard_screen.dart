@@ -39,10 +39,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _panel(Column(children: [
         Row(children: [
           const Icon(Icons.volume_up_outlined, color: Color(0xFFB39DFF)),
-          const SizedBox(width: 10), const Expanded(child: Text('In-app volume')),
+          const SizedBox(width: 10), const Expanded(child: Text('IEMA volume preview')),
           Text('${(appVolume * 100).round()}%'),
         ]),
         Slider(value: appVolume, onChanged: (v) => setState(() => appVolume = v)),
+        const Align(alignment: Alignment.centerLeft, child: Text('UI preview only; not system or Bluetooth hardware volume.', style: TextStyle(color: Colors.white38, fontSize: 11))),
       ])),
       const SizedBox(height: 22),
       _section('SOUND PROFILES'),
