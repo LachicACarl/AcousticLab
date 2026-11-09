@@ -112,7 +112,7 @@ class DspAudioPipeline {
         await stop();
         rethrow;
       }
-      await Future<void>.delayed(const Duration(milliseconds: 18));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
     }
   }
 
