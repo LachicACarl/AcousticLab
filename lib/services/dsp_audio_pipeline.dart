@@ -132,9 +132,8 @@ class DspAudioPipeline {
       final bytes = _makeChunk();
       final player = _player;
       if (!_running) break;
-      if (player == null) break;
       try {
-        await player.feed(bytes);
+        await player?.feed(bytes);
       } catch (_) {
         await stop();
         rethrow;
