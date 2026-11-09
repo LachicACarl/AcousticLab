@@ -37,9 +37,9 @@ final class AudioOutputRouteStreamHandler: NSObject, FlutterStreamHandler {
     let route: String
 
     if outputs.contains(where: {
-      [$0.portType == .bluetoothA2DP,
-       $0.portType == .bluetoothHFP,
-       $0.portType == .bluetoothLE].contains(true)
+      $0.portType == .bluetoothA2DP ||
+      $0.portType == .bluetoothHFP ||
+      $0.portType == .bluetoothLE
     }) {
       route = "bluetooth"
     } else if outputs.contains(where: {
@@ -52,9 +52,10 @@ final class AudioOutputRouteStreamHandler: NSObject, FlutterStreamHandler {
       route = "other"
     }
 
+    let reasonValue: Any = reason != nil ? Int(reason!) : NSNull()
     eventSink?([
       "route": route,
-      "reason": reason.map { Int($0) } as Any? ?? NSNull(),
+      "reason": reasonValue,
       "outputs": outputs.map { $0.portType.rawValue }
     ])
   }
@@ -75,14 +76,7 @@ final class AudioOutputRouteStreamHandler: NSObject, FlutterStreamHandler {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let result = super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    if let controller = window?.rootViewController as? FlutterViewController {
-      FlutterEventChannel(
-        name: audioRouteChannelName,
-        binaryMessenger: controller.binaryMessenger
-      ).setStreamHandler(audioRouteHandler)
-    }
-    return result
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
