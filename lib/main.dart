@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'screens/audio_player_page.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/equalizer_screen.dart';
 import 'services/audio_service.dart';
 
 void main() {
@@ -40,9 +42,9 @@ class _IEMAMainScreenState extends State<IEMAMainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    HomePage(),
+    DashboardScreen(),
     DevicesPage(),
-    EqualizerPage(),
+    EqualizerScreen(),
     LibraryPage(),
     MorePage(),
   ];
