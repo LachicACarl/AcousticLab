@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:audio_stream_player/audio_stream_player.dart';
 import 'audio_session_service.dart';
 import 'audio_route_safety_service.dart';
+import 'audio_output_route_adapter.dart';
 
 import 'five_band_pcm_equalizer.dart';
 
@@ -59,6 +60,21 @@ class DspAudioPipeline {
     await safety.listen(
       routeChanges: activeOutputRouteChanges,
       bleConnectionChanges: bleConnectionChanges,
+    );
+  }
+
+  /// Configures the native route observer where a trustworthy adapter
+  /// exists. iOS emits AVAudioSession active-output classifications; Android
+  /// intentionally supplies an empty stream until authoritative media-route
+  /// observation is implemented.
+  Future<void> configurePlatformRouteSafety({
+    Stream<bool>? bleConnectionChanges,
+    Duration gracePeriod = const Duration(milliseconds: 1800),
+  }) {
+    return configureRouteSafety(
+      activeOutputRouteChanges: AudioOutputRouteAdapter.activeRouteChanges,
+      bleConnectionChanges: bleConnectionChanges,
+      gracePeriod: gracePeriod,
     );
   }
 
