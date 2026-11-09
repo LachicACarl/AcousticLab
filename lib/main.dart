@@ -3,6 +3,7 @@ import 'screens/audio_player_page.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/equalizer_screen.dart';
 import 'services/audio_service.dart';
+import 'services/audio_playback_safety_coordinator.dart';
 
 void main() {
   runApp(const IEMAApp());
@@ -40,6 +41,18 @@ class IEMAMainScreen extends StatefulWidget {
 
 class _IEMAMainScreenState extends State<IEMAMainScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    AudioPlaybackSafetyCoordinator.instance.start();
+  }
+
+  @override
+  void dispose() {
+    AudioPlaybackSafetyCoordinator.instance.dispose();
+    super.dispose();
+  }
 
   final List<Widget> _pages = const [
     DashboardScreen(),
@@ -106,13 +119,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final AudioService _audioService = AudioService();
-
-  @override
-  void dispose() {
-    _audioService.dispose();
-    super.dispose();
-  }
+  final AudioService _audioService = AudioService.instance;
   double volume = 65;
 
   @override
