@@ -3,6 +3,10 @@
 import '../models/eq_profile.dart';
 
 class AudioService {
+  AudioService._();
+
+  static final AudioService instance = AudioService._();
+
   final AudioPlayer _player = AudioPlayer();
 
   EqProfile _currentProfile = EqProfile.flat();
