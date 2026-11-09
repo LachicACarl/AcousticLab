@@ -23,7 +23,7 @@ class AudioSessionService {
   bool get isDucked => _isDucked;
 
   Future<void> initialize({
-    required Future<void> Function() pause,
+    required Future<bool> Function() pause,
     required Future<void> Function() resume,
     required void Function(bool ducked) onDuck,
   }) async {
