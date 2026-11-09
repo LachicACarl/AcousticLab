@@ -19,7 +19,7 @@ class DspAudioPipeline {
   final Random _random = Random();
   AudioStreamPlayer? _player;
   FiveBandPcmEqualizer _eq = FiveBandPcmEqualizer(
-    sampleRate: sampleRate, channels: channels, gainsDb: [0, 0, 0, 0, 0]);
+    sampleRate: sampleRate, channels: channels, gainsDb: [0.0, 0.0, 0.0, 0.0, 0.0]);
   FiveBandPcmEqualizer? _previousEq;
   int _crossfadeRemaining = 0;
   bool _running = false;
@@ -108,7 +108,7 @@ class DspAudioPipeline {
   }
 
   void setVolume(double value) {
-    _volume = value.clamp(0.0, 1.0);
+    _volume = value.clamp(0.0, 1.0).toDouble();
   }
 
   /// Replaces coefficients using a 100 ms parallel crossfade to avoid a
@@ -131,7 +131,8 @@ class DspAudioPipeline {
       }
       final bytes = _makeChunk();
       final player = _player;
-      if (player == null || !_running) break;
+      if (!_running) break;
+      if (player == null) break;
       try {
         await player.feed(bytes);
       } catch (_) {
