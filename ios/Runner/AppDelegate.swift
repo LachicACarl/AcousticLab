@@ -83,7 +83,7 @@ final class AudioOutputRouteStreamHandler: NSObject, FlutterStreamHandler {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     FlutterEventChannel(
       name: audioRouteChannelName,
-      binaryMessenger: engineBridge.binaryMessenger
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
     ).setStreamHandler(audioRouteHandler)
   }
 }
