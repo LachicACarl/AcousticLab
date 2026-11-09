@@ -38,6 +38,7 @@ dependencies:
   flutter_blue_plus: ^1.36.8
   shared_preferences: ^2.5.6
   audio_stream_player: ^1.1.0
+  audio_session: ^0.2.4
 
 dev_dependencies:
   flutter_test:
