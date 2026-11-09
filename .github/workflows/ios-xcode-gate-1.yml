@@ -1,6 +1,9 @@
 name: iOS Xcode Gate 1 (locked baseline)
 
 on:
+  push:
+    branches:
+      - ci/ios-xcode-gate-bb7dc72f
   workflow_dispatch:
 
 permissions:
