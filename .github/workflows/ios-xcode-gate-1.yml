@@ -1,0 +1,85 @@
+name: iOS Xcode Gate 1 (locked baseline)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-gate-1-bb7dc72f
+  cancel-in-progress: false
+
+jobs:
+  ios-debug-no-codesign:
+    name: Compile iOS at bb7dc72f
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      TARGET_SHA: bb7dc72f0df465f6096e887d127a07af5aaa0563
+    steps:
+      - name: Check out the immutable verification baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Select and report Xcode
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcode-select -p
+          sw_vers
+
+      - name: Set up Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Record Flutter and Dart toolchain
+        run: |
+          set -euo pipefail
+          flutter --version
+          dart --version
+          flutter doctor -v
+
+      - name: Resolve Flutter dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Inspect iOS CocoaPods project inputs
+        run: |
+          set -euo pipefail
+          echo "Baseline: ${TARGET_SHA}"
+          echo "Checked-out commit: $(git rev-parse HEAD)"
+          if [ ! -f ios/Podfile ]; then
+            echo "::warning::ios/Podfile is absent at the locked baseline. The native build will be attempted as-is; Flutter/Xcode output will determine whether this is a blocking project configuration issue."
+          else
+            echo "ios/Podfile present."
+          fi
+          if command -v pod >/dev/null 2>&1; then
+            pod --version
+          else
+            echo "::error::CocoaPods is not installed on the runner."
+            exit 1
+          fi
+
+      - name: Build iOS debug without code signing
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          flutter build ios --debug --no-codesign -v 2>&1 | tee build/ios-xcode-build.log
+
+      - name: Upload native build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-gate-1-evidence-bb7dc72f
+          path: |
+            build/ios-xcode-build.log
+            build/ios/iphoneos/Runner.app/**
+          if-no-files-found: warn
+          retention-days: 14
