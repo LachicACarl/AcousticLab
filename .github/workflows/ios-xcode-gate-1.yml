@@ -1,4 +1,4 @@
-name: iOS Xcode Gate 1 (locked baseline)
+name: iOS Xcode Gate 1 (EventChannel fix)
 
 on:
   push:
@@ -10,18 +10,18 @@ permissions:
   contents: read
 
 concurrency:
-  group: ios-gate-1-bb7dc72f
+  group: ios-gate-1-eventchannel-fix
   cancel-in-progress: false
 
 jobs:
   ios-debug-no-codesign:
-    name: Compile iOS at bb7dc72f
+    name: Compile iOS EventChannel fix
     runs-on: macos-latest
     timeout-minutes: 45
     env:
-      TARGET_SHA: bb7dc72f0df465f6096e887d127a07af5aaa0563
+      TARGET_SHA: b6d6d9c4c94455c40829edde5afdb6c0c1916b47
     steps:
-      - name: Check out the immutable verification baseline
+      - name: Check out the immutable fix commit
         uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_SHA }}
@@ -55,19 +55,15 @@ jobs:
       - name: Inspect iOS CocoaPods project inputs
         run: |
           set -euo pipefail
-          echo "Baseline: ${TARGET_SHA}"
+          echo "Target commit: ${TARGET_SHA}"
           echo "Checked-out commit: $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${TARGET_SHA}"
           if [ ! -f ios/Podfile ]; then
-            echo "::warning::ios/Podfile is absent at the locked baseline. The native build will be attempted as-is; Flutter/Xcode output will determine whether this is a blocking project configuration issue."
+            echo "::warning::ios/Podfile is absent at this baseline; Flutter will use the generated Swift Package integration."
           else
             echo "ios/Podfile present."
           fi
-          if command -v pod >/dev/null 2>&1; then
-            pod --version
-          else
-            echo "::error::CocoaPods is not installed on the runner."
-            exit 1
-          fi
+          pod --version
 
       - name: Build iOS debug without code signing
         shell: bash
@@ -80,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ios-gate-1-evidence-bb7dc72f
+          name: ios-gate-1-evidence-eventchannel-fix
           path: |
             build/ios-xcode-build.log
             build/ios/iphoneos/Runner.app/**
