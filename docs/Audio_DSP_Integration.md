@@ -1,39 +1,21 @@
-# Audio DSP milestone: integration gate
+# Audio DSP pipeline
 
-The app now includes `lib/services/five_band_pcm_equalizer.dart`, a
-stateful five-band peaking-biquad processor for decoded, interleaved float PCM.
+## Implemented
 
-**This is a DSP implementation, not an active playback graph.** Existing
-`just_audio` playback does not automatically pass decoded PCM through this
-processor. The dashboard's ambient choices and volume remain UI-only until
-the playback integration below is completed. No system-wide audio effects
-or Bluetooth hardware DSP are implied.
+- `audio_stream_player: ^1.1.0` provides raw PCM playback through native Android AudioTrack and iOS AVAudioEngine output.
+- `DspAudioPipeline` generates stereo 48 kHz ambient PCM (white noise, filtered rain-like noise, and soft-focus noise), processes each chunk through the custom five-band peaking biquad chain, converts it to signed 16-bit little-endian PCM, and feeds the native stream player.
+- Dashboard soundscape chips start/stop generated audio; pause/resume and in-app ambient gain are connected.
+- EQ preset selection and slider movement update the running DSP processor. A 100 ms parallel crossfade reduces abrupt changes, but cannot guarantee click-free behavior on every device or under underrun/load conditions.
 
-## Required next integration
+## Important scope
 
-1. Choose and verify a Flutter-compatible output engine that accepts custom
-   processed PCM or exposes a verified native DSP/filter hook on both iOS
-   and Android. Do not assume an arbitrary Flutter audio package can insert
-   Dart callbacks into its real-time audio thread.
-2. Decode or generate soundscape PCM and run it through the EQ **before**
-   submitting it to the output device. Keep state per channel and per stream.
-3. Avoid doing per-sample Dart allocation on a real-time audio callback:
-   prefer native DSP, preallocated buffers, or worker-produced buffered audio.
-4. Send active preset changes to the engine with coefficient smoothing or
-   crossfades to avoid clicks. The current `updateGains` resets filter
-   history, so it is **not** click-free live automation.
-5. Connect the dashboard controls to actual play/pause, in-app gain, and
-   playback state. Audio output route detection requires separate platform
-   implementations and permissions/capability checks.
-6. Test on physical iOS and Android hardware with Bluetooth headphones,
-   interruptions, audio focus, background mode, and different sample rates.
-   Verify spectrum response with recorded output or a loopback measurement.
+This processes only audio generated and played by IEMA. It does not EQ other apps, change phone system volume, or control headphone DSP/ANC. "Rain" and "Soft focus" are synthesized noise textures, not recorded rain or music. Device route detection, audio focus policy, interruption recovery, and background media session are not wired yet.
 
-## Existing DSP test coverage
+## Validation still required
 
-`test/five_band_pcm_equalizer_test.dart` checks flat passthrough, measurable
-60 Hz boost, and invalid input handling. These tests have been added but
-**not executed** in this GitHub-only session.
+- Run `flutter pub get`, `flutter analyze`, and `flutter test`.
+- Verify package native builds on Android and iOS (iOS requires macOS/Xcode or a cloud macOS builder).
+- Test physical devices and Bluetooth output: repeated start/stop, pause/resume, live slider changes, interruptions, route changes, and long-running memory/buffer behavior.
+- Measure frequency response with known test tones or loopback recording. Simulator output is not a substitute for physical-device verification.
 
-Note: `16 kHz` is skipped for sample rates where it reaches/exceeds
-Nyquist. For production, define precise band behavior at each sample rate.
+The existing PCM math tests remain in `test/five_band_pcm_equalizer_test.dart`.
