@@ -12,7 +12,7 @@ class AudioSessionService {
   StreamSubscription<AudioInterruptionEvent>? _interruptionSubscription;
   StreamSubscription<void>? _noisySubscription;
   Future<void>? _initializing;
-  Future<void> Function()? onPause;
+  Future<bool> Function()? onPause;
   Future<void> Function()? onResume;
   void Function(bool ducked)? onDuckChanged;
 
@@ -79,8 +79,7 @@ class AudioSessionService {
           break;
         case AudioInterruptionType.pause:
         case AudioInterruptionType.unknown:
-          _wasPlayingBeforeInterruption = true;
-          await onPause?.call();
+          _wasPlayingBeforeInterruption = await onPause?.call() ?? false;
           break;
       }
       return;
