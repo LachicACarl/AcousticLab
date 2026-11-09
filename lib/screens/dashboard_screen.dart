@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/dsp_audio_pipeline.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -8,7 +9,17 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String soundscape = 'Off';
-  double appVolume = 0.7;
+  double appVolume = 0.65;
+  bool get _playing => DspAudioPipeline.instance.isPlaying;
+
+  Future<void> _selectSoundscape(String value) async {
+    if (value == 'Off') {
+      await DspAudioPipeline.instance.stop();
+    } else {
+      await DspAudioPipeline.instance.start(value);
+    }
+    if (mounted) setState(() => soundscape = value);
+  }
   static const profiles = ['Off', 'White noise', 'Rain', 'Soft focus'];
 
   @override
@@ -42,7 +53,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 10), const Expanded(child: Text('IEMA volume preview')),
           Text('${(appVolume * 100).round()}%'),
         ]),
-        Slider(value: appVolume, onChanged: (v) => setState(() => appVolume = v)),
+        Slider(value: appVolume, onChanged: (v) {
+          setState(() => appVolume = v);
+          DspAudioPipeline.instance.setVolume(v);
+        }),
         const Align(alignment: Alignment.centerLeft, child: Text('UI preview only; not system or Bluetooth hardware volume.', style: TextStyle(color: Colors.white38, fontSize: 11))),
       ])),
       const SizedBox(height: 22),
@@ -55,10 +69,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 12),
         Wrap(spacing: 8, runSpacing: 8, children: profiles.map((p) =>
           ChoiceChip(label: Text(p), selected: soundscape == p,
-            onSelected: (_) => setState(() => soundscape = p))).toList()),
-        if (soundscape != 'Off') const Padding(padding: EdgeInsets.only(top: 12),
-          child: Text('Soundscape selection is a UI state for now; audio assets and playback are a separate milestone.',
-            style: TextStyle(color: Colors.amberAccent, fontSize: 12))),
+            onSelected: (_) => _selectSoundscape(p))).toList()),
+        if (soundscape != 'Off') Padding(padding: const EdgeInsets.only(top: 12),
+          child: Row(children: [
+            Icon(_playing ? Icons.graphic_eq : Icons.pause_circle_outline,
+              color: const Color(0xFFB39DFF), size: 18),
+            const SizedBox(width: 8),
+            Text(_playing ? 'Generating and processing live PCM audio' : 'Ambient audio paused',
+              style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            const Spacer(),
+            IconButton(tooltip: _playing ? 'Pause' : 'Resume',
+              onPressed: () async {
+                if (_playing) { await DspAudioPipeline.instance.pause(); }
+                else { await DspAudioPipeline.instance.resume(); }
+                if (mounted) setState(() {});
+              }, icon: Icon(_playing ? Icons.pause : Icons.play_arrow)),
+          ])),
       ])),
       const SizedBox(height: 22),
       _section('QUICK ACCESS'),
