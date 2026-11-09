@@ -48,15 +48,15 @@ class AudioRouteSafetyService {
   /// Attach injectable observations. Streams may be supplied by platform
   /// adapters and tests; this class itself does not claim to discover the
   /// active route from audio_session device-presence events.
-  void listen({
+  Future<void> listen({
     required Stream<AudioOutputRoute> routeChanges,
     Stream<bool>? bleConnectionChanges,
-  }) {
+  }) async {
     if (_disposed) {
       throw StateError('AudioRouteSafetyService has been disposed.');
     }
-    _routeSubscription?.cancel();
-    _bleSubscription?.cancel();
+    await _routeSubscription?.cancel();
+    await _bleSubscription?.cancel();
     _routeSubscription = routeChanges.listen(reportRoute);
     if (bleConnectionChanges != null) {
       _bleSubscription = bleConnectionChanges.listen(reportBleConnection);
