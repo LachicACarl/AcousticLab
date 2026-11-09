@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'audio_playback_safety_coordinator.dart';
+import 'async_operation_lock.dart';
 
 /// BLE Central service for discovering and connecting to compatible earbuds.
 ///
@@ -22,6 +23,7 @@ class BluetoothService {
       StreamController<List<ScanResult>>.broadcast();
 
   BluetoothDevice? _device;
+  final AsyncOperationLock _connectionLock = AsyncOperationLock();
   bool _isScanning = false;
 
   Stream<List<ScanResult>> get scanResults => _resultsController.stream;
@@ -76,22 +78,26 @@ class BluetoothService {
     _isScanning = false;
   }
 
-  Future<void> connect(BluetoothDevice device) async {
-    if (_device?.remoteId == device.remoteId) return;
+  Future<void> connect(BluetoothDevice device) {
+    return _connectionLock.synchronized(() async {
+      if (_device?.remoteId == device.remoteId) return;
 
-    await disconnect();
-    _device = device;
+      // Use the internal teardown while holding the same lock. Calling the
+      // public disconnect() here would attempt to acquire the lock twice.
+      await _disconnectInternal();
+      _device = device;
 
-    try {
-      await device.connect(
-        timeout: const Duration(seconds: 15),
-        autoConnect: false,
-      );
-      await device.discoverServices();
-    } catch (_) {
-      _device = null;
-      rethrow;
-    }
+      try {
+        await device.connect(
+          timeout: const Duration(seconds: 15),
+          autoConnect: false,
+        );
+        await device.discoverServices();
+      } catch (_) {
+        _device = null;
+        rethrow;
+      }
+    });
   }
 
   Future<List<BluetoothServiceData>> discoverServices() async {
@@ -185,7 +191,11 @@ class BluetoothService {
     );
   }
 
-  Future<void> disconnect() async {
+  Future<void> disconnect() {
+    return _connectionLock.synchronized(_disconnectInternal);
+  }
+
+  Future<void> _disconnectInternal() async {
     final safetyCoordinator = AudioPlaybackSafetyCoordinator.instance;
     safetyCoordinator.setIntentionalBluetoothDisconnect(true);
 
