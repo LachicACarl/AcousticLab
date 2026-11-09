@@ -56,7 +56,7 @@ class DspAudioPipeline {
     );
     await audioSession.activate();
     final player = await AudioStreamPlayer.create(
-      sampleRate: sampleRate,
+      sampleRate: sampleRate.round(),
       channels: channels,
       format: PcmFormat.s16le,
     );
