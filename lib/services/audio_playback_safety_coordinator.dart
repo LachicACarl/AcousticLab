@@ -41,6 +41,11 @@ class AudioPlaybackSafetyCoordinator with WidgetsBindingObserver {
     }
   }
 
+  /// Call before an app-initiated BLE disconnect; clear after it completes.
+  void setIntentionalBluetoothDisconnect(bool intentional) {
+    _routeSafety?.setIntentionalDisconnect(intentional);
+  }
+
   /// Pauses all app-owned players, not just whichever player is visible.
   Future<void> pauseAll() async {
     await Future.wait([
