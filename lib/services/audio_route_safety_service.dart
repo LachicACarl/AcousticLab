@@ -38,7 +38,6 @@ class AudioRouteSafetyService {
   StreamSubscription<bool>? _bleSubscription;
   Timer? _graceTimer;
   AudioOutputRoute _route = AudioOutputRoute.unknown;
-  bool _bleConnected = true;
   bool _intentionalDisconnect = false;
   bool _pauseTriggered = false;
   bool _disposed = false;
@@ -88,7 +87,6 @@ class AudioRouteSafetyService {
 
   void reportBleConnection(bool connected) {
     if (_disposed || _intentionalDisconnect) return;
-    _bleConnected = connected;
     if (connected) {
       if (_route == AudioOutputRoute.bluetooth) {
         _cancelGracePeriod();
