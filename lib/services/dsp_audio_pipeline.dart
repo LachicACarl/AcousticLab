@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:audio_stream_player/audio_stream_player.dart';
+import 'audio_session_service.dart';
 
 import 'five_band_pcm_equalizer.dart';
 
@@ -25,6 +26,7 @@ class DspAudioPipeline {
   bool _paused = false;
   String _soundscape = 'Off';
   double _volume = 0.65;
+  double _duckMultiplier = 1.0;
   double _rainState = 0;
   double _softState = 0;
 
@@ -40,11 +42,19 @@ class DspAudioPipeline {
     }
     if (_running) {
       _soundscape = soundscape;
+      await AudioSessionService.instance.activate();
       _paused = false;
       await _player?.play();
       return;
     }
     _soundscape = soundscape;
+    final audioSession = AudioSessionService.instance;
+    await audioSession.initialize(
+      pause: _pauseForInterruption,
+      resume: _resumeAfterInterruption,
+      onDuck: (ducked) { _duckMultiplier = ducked ? 0.25 : 1.0; },
+    );
+    await audioSession.activate();
     final player = await AudioStreamPlayer.create(
       sampleRate: sampleRate,
       channels: channels,
@@ -65,6 +75,7 @@ class DspAudioPipeline {
 
   Future<void> resume() async {
     if (!_running || !_paused) return;
+    await AudioSessionService.instance.activate();
     _paused = false;
     await _player?.play();
   }
@@ -79,6 +90,20 @@ class DspAudioPipeline {
       await player.dispose();
     }
     _soundscape = 'Off';
+    await AudioSessionService.instance.deactivate();
+  }
+
+  Future<void> _pauseForInterruption() async {
+    if (!_running || _paused) return;
+    _paused = true;
+    await _player?.pause();
+  }
+
+  Future<void> _resumeAfterInterruption() async {
+    if (!_running || !_paused) return;
+    await AudioSessionService.instance.activate();
+    _paused = false;
+    await _player?.play();
   }
 
   void setVolume(double value) {
@@ -137,7 +162,7 @@ class DspAudioPipeline {
           if (_crossfadeRemaining <= 0) _previousEq = null;
         }
       }
-      final scaled = (value * _volume).clamp(-1.0, 1.0);
+      final scaled = (value * _volume * _duckMultiplier).clamp(-1.0, 1.0);
       final sample16 = (scaled * 32767).round();
       bytes.setInt16(i * 2, sample16, Endian.little);
     }
