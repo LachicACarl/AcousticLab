@@ -74,7 +74,7 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
         style: TextStyle(color: Colors.white54)),
       const SizedBox(height: 22),
       DropdownButtonFormField<String>(
-        value: selected,
+        initialValue: selected,
         decoration: const InputDecoration(labelText: 'Preset', filled: true,
           border: OutlineInputBorder()),
         items: profiles.map((p) => DropdownMenuItem(value: p.name, child: Text(p.name))).toList(),
