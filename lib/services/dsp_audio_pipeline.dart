@@ -3,8 +3,6 @@ import 'dart:typed_data';
 
 import 'package:audio_stream_player/audio_stream_player.dart';
 import 'audio_session_service.dart';
-import 'audio_route_safety_service.dart';
-import 'audio_output_route_adapter.dart';
 
 import 'five_band_pcm_equalizer.dart';
 
@@ -31,64 +29,11 @@ class DspAudioPipeline {
   double _duckMultiplier = 1.0;
   double _rainState = 0;
   double _softState = 0;
-  AudioRouteSafetyService? _routeSafetyService;
 
   bool get isPlaying => _running && !_paused;
   String get soundscape => _soundscape;
   double get volume => _volume;
   List<double> get gainsDb => _eq.gainsDb;
-
-  /// Connects platform-observed active output routes to the safety policy.
-  ///
-  /// The supplied stream must represent the active media output, not merely
-  /// connected/available audio devices. Android adapters that cannot make
-  /// that distinction should not supply a route stream.
-  Future<void> configureRouteSafety({
-    required Stream<AudioOutputRoute> activeOutputRouteChanges,
-    Stream<bool>? bleConnectionChanges,
-    Duration gracePeriod = const Duration(milliseconds: 1800),
-  }) async {
-    final previous = _routeSafetyService;
-    _routeSafetyService = null;
-    await previous?.dispose();
-
-    final safety = AudioRouteSafetyService(
-      gracePeriod: gracePeriod,
-      onUnsafeRoute: pause,
-    );
-    _routeSafetyService = safety;
-    await safety.listen(
-      routeChanges: activeOutputRouteChanges,
-      bleConnectionChanges: bleConnectionChanges,
-    );
-  }
-
-  /// Configures the native route observer where a trustworthy adapter
-  /// exists. iOS emits AVAudioSession active-output classifications; Android
-  /// intentionally supplies an empty stream until authoritative media-route
-  /// observation is implemented.
-  Future<void> configurePlatformRouteSafety({
-    Stream<bool>? bleConnectionChanges,
-    Duration gracePeriod = const Duration(milliseconds: 1800),
-  }) {
-    return configureRouteSafety(
-      activeOutputRouteChanges: AudioOutputRouteAdapter.activeRouteChanges,
-      bleConnectionChanges: bleConnectionChanges,
-      gracePeriod: gracePeriod,
-    );
-  }
-
-  /// Mark an app-initiated earbud disconnect before invoking the BLE
-  /// disconnect operation, then clear it after the operation completes.
-  void setIntentionalBluetoothDisconnect(bool intentional) {
-    _routeSafetyService?.setIntentionalDisconnect(intentional);
-  }
-
-  Future<void> clearRouteSafety() async {
-    final safety = _routeSafetyService;
-    _routeSafetyService = null;
-    await safety?.dispose();
-  }
 
   Future<void> start(String soundscape) async {
     if (!['White noise', 'Rain', 'Soft focus'].contains(soundscape)) {
