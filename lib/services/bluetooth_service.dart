@@ -15,6 +15,7 @@ class BluetoothService {
 
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
+  StreamSubscription<bool>? _scanningSubscription;
   final StreamController<List<ScanResult>> _resultsController =
       StreamController<List<ScanResult>>.broadcast();
 
@@ -62,7 +63,8 @@ class BluetoothService {
       rethrow;
     }
 
-    FlutterBluePlus.isScanning.listen((scanning) {
+    await _scanningSubscription?.cancel();
+    _scanningSubscription = FlutterBluePlus.isScanning.listen((scanning) {
       _isScanning = scanning;
     });
   }
@@ -202,6 +204,7 @@ class BluetoothService {
     await stopScan();
     await disconnect();
     await _scanSubscription?.cancel();
+    await _scanningSubscription?.cancel();
     await _resultsController.close();
   }
 }
