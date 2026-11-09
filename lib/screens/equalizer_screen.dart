@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/eq_profile_store.dart';
+import '../services/dsp_audio_pipeline.dart';
 
 class EqualizerScreen extends StatefulWidget {
   const EqualizerScreen({super.key});
@@ -28,6 +29,7 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
       selected = matches.isEmpty ? 'Flat' : active;
       gains = List.of(matches.isEmpty ? loaded.first.gains : matches.first.gains);
       loading = false;
+      DspAudioPipeline.instance.updateGains(gains);
     });
   }
 
@@ -35,6 +37,7 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
     final profile = profiles.firstWhere((p) => p.name == name);
     setState(() { selected = name; gains = List.of(profile.gains); });
     await store.saveActiveName(name);
+    DspAudioPipeline.instance.updateGains(gains);
   }
 
   Future<void> _save() async {
@@ -88,7 +91,10 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
             SizedBox(width: 58, child: Text(bands[i], style: const TextStyle(color: Colors.white70))),
             Expanded(child: Slider(min: -12, max: 12, divisions: 48, value: gains[i],
               label: '${gains[i].toStringAsFixed(1)} dB',
-              onChanged: (v) => setState(() { gains[i] = v; selected = 'Custom'; }))),
+              onChanged: (v) {
+                setState(() { gains[i] = v; selected = 'Custom'; });
+                DspAudioPipeline.instance.updateGains(gains);
+              })),
             SizedBox(width: 48, child: Text(
               '${gains[i] >= 0 ? '+' : ''}${gains[i].toStringAsFixed(1)}',
               textAlign: TextAlign.end)),
