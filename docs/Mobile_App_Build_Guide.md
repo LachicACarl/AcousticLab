@@ -201,3 +201,19 @@ A generic GATT browser can reveal exposed services, but discovery alone does not
 ## Current phase status
 
 This branch provides the project-specific architecture guide, BLE service foundation, and platform permission declarations. It does **not** yet connect to a known earbud model from the UI or send ANC/EQ commands. That next step requires the exact earbud model and its GATT protocol. Test on real Android/iOS hardware before treating BLE support as production-ready.
+
+
+## 11. Software companion UI milestone
+
+The app now routes its Home tab to `DashboardScreen` and its EQ tab to `EqualizerScreen`.
+
+- The dashboard explains that the phone's system Bluetooth settings manage pairing and output routing.
+- Ambient soundscape choices are UI placeholders until audio assets and playback are added.
+- Five-band EQ profiles (60 Hz, 250 Hz, 1 kHz, 4 kHz, 16 kHz) can be selected, adjusted, and saved locally with `shared_preferences`.
+- The saved EQ values are currently profile state, not a completed cross-platform audio DSP effect.
+
+### Platform audio limits
+
+Do not describe this app as a system-wide equalizer. iOS does not provide third-party apps a public API to apply an EQ to audio from every other app. Android's platform `Equalizer` effect is associated with an audio session and does not grant unrestricted processing of all device audio. A portable equalizer must process audio that IEMA itself decodes/plays, using a DSP implementation supported on each target platform. The current UI deliberately labels the scope as IEMA in-app audio.
+
+Similarly, standard public mobile APIs do not guarantee that an app can enumerate every connected Bluetooth output device and retrieve all metadata on both platforms. The operating system remains responsible for Bluetooth pairing and routing. IEMA should not promise universal device battery, ANC, transparency, or touch remapping.
