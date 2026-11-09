@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import 'audio_playback_safety_coordinator.dart';
+
 /// BLE Central service for discovering and connecting to compatible earbuds.
 ///
 /// This service intentionally does not assume vendor-specific UUIDs. Most
@@ -184,18 +186,27 @@ class BluetoothService {
   }
 
   Future<void> disconnect() async {
-    await _connectionSubscription?.cancel();
-    _connectionSubscription = null;
+    final safetyCoordinator = AudioPlaybackSafetyCoordinator.instance;
+    safetyCoordinator.setIntentionalBluetoothDisconnect(true);
 
-    final current = _device;
-    _device = null;
+    try {
+      await _connectionSubscription?.cancel();
+      _connectionSubscription = null;
 
-    if (current != null) {
-      try {
-        await current.disconnect();
-      } catch (_) {
-        // A device may already have disconnected; treat this as cleanup.
+      final current = _device;
+      _device = null;
+
+      if (current != null) {
+        try {
+          await current.disconnect();
+        } catch (_) {
+          // A device may already have disconnected; treat this as cleanup.
+        }
       }
+    } finally {
+      // Never leave route protection bypassed if cancellation or disconnect
+      // cleanup throws. Clearing the bypass re-evaluates the current route.
+      safetyCoordinator.setIntentionalBluetoothDisconnect(false);
     }
   }
 
