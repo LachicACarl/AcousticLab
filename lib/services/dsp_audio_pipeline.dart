@@ -12,7 +12,7 @@ class DspAudioPipeline {
   DspAudioPipeline._();
   static final instance = DspAudioPipeline._();
 
-  static const sampleRate = 48000;
+  static const double sampleRate = 48000.0;
   static const channels = 2;
   static const framesPerChunk = 960; // 20 ms
   static const _crossfadeFrames = 4800; // 100 ms
@@ -130,10 +130,9 @@ class DspAudioPipeline {
         continue;
       }
       final bytes = _makeChunk();
-      final player = _player;
       if (!_running) break;
       try {
-        await player?.feed(bytes);
+        await _player?.feed(bytes);
       } catch (_) {
         await stop();
         rethrow;
@@ -151,7 +150,7 @@ class DspAudioPipeline {
     }
     final processed = _eq.process(pcm);
     final old = _previousEq;
-    final oldProcessed = old == null ? null : old.process(pcm);
+    final oldProcessed = old?.process(pcm);
     final bytes = ByteData(processed.length * 2);
     for (var i = 0; i < processed.length; i++) {
       var value = processed[i];
